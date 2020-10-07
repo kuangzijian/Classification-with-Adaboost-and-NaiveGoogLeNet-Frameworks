@@ -18,10 +18,11 @@ w2 = torch.tensor(w2, requires_grad=True, device=device)
 learning_rate = 0.5
 
 for t in range(1):
+    print("Epoch： ", t + 1)
     H = (x.mm(w1) + b1).sigmoid()
     y_pred = (H.mm(w2) + b2).sigmoid()
-    loss = (y_pred - y).pow(2).sum()
-
+    loss = (y_pred - y).pow(2).sum()/2
+    print("loss: ", loss.data)
     loss.backward()
 
     with torch.no_grad():
