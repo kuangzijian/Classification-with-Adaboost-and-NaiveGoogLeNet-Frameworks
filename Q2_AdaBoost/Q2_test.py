@@ -1,5 +1,5 @@
 import numpy as np
-from Q2_AdaBoost import AdaBoost
+from Q2_AdaBoost.AdaBoost import AdaBoost
 
 print('==========Train==========')
 X = np.random.rand(10,3)
