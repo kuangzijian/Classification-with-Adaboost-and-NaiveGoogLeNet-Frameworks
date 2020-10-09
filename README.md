@@ -72,7 +72,7 @@ cd Q3_NN_with_Autograd
 python NN_with_Autograd.py
 ```
 
-### Q4 Implement the Adaboost algorithm class according to the Adaboost Algorithm 
+### Q4 Implement Naive Inception Module for GoogLeNet and use it to train and test by using the MNIST dataset
 
 ```
 cd Q4_mnist_googlenet
