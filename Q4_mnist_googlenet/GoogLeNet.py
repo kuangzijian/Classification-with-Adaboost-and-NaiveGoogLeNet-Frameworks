@@ -5,10 +5,10 @@ from torch.jit.annotations import Optional, Tuple
 from torch import Tensor
 
 
-class NaiveGoogLeNet(nn.Module):
+class GoogLeNet(nn.Module):
     def __init__(self, num_classes=10, init_weights=True,
                  blocks=None):
-        super(NaiveGoogLeNet, self).__init__()
+        super(GoogLeNet, self).__init__()
         if blocks is None:
             blocks = [BasicConv2d, Inception, InceptionAux]
         if init_weights is None:
