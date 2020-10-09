@@ -61,11 +61,11 @@ def googlenet(pretrained=False, progress=True, **kwargs):
 
     return GoogLeNet(**kwargs)
 
-
+# improved the code, introduce an input_channel variable, which will allow to train 1 channel grayScale image
 class GoogLeNet(nn.Module):
     __constants__ = ['aux_logits', 'transform_input']
 
-    def __init__(self,input_channel =3, num_classes=1000, aux_logits=True, transform_input=False, init_weights=None,
+    def __init__(self, input_channel=3, num_classes=1000, aux_logits=True, transform_input=False, init_weights=None,
                  blocks=None):
         super(GoogLeNet, self).__init__()
         if blocks is None:
