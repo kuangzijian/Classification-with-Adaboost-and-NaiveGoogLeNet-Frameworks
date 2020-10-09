@@ -78,7 +78,11 @@ python NN_with_Autograd.py
 cd Q4_mnist_googlenet
 python train_googlenet.py
 python train_naive_googlenet.py
+
+NaiveGoogLeNet and GoogLeNet model training and test outputs analysis report can be found under:
 ```
+[NaiveGoogLeNet and GoogLeNet model ReadMe](Q4_mnist_googlenet/README.md)
+
 
 <!-- CONTRIBUTING -->
 ## Contributing
