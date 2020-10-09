@@ -1,5 +1,9 @@
 # NaiveGoogLeNet and GoogLeNet model training and test outputs analysis report
 
+```
+python train_googlenet.py
+python train_naive_googlenet.py
+```
 
 The training process on the GoogLeNet with MNIST Datasets, takes around 1min30secs to train the model per epoch (based on the timer I added in the training code).
 After 2 epochs training, the test accuracy reaches to 99%.
