@@ -1,88 +1,24 @@
-import warnings
-from collections import namedtuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.jit.annotations import Optional, Tuple
 from torch import Tensor
-try:
-    from torch.hub import load_state_dict_from_url
-except ImportError:
-    from torch.utils.model_zoo import load_url as load_state_dict_from_url
-
-__all__ = ['NaiveGoogLeNet', 'googlenet', "GoogLeNetOutputs", "_GoogLeNetOutputs"]
-
-model_urls = {
-    # NaiveGoogLeNet ported from TensorFlow
-    'googlenet': 'https://download.pytorch.org/models/googlenet-1378be20.pth',
-}
-
-GoogLeNetOutputs = namedtuple('GoogLeNetOutputs', ['logits', 'aux_logits2', 'aux_logits1'])
-GoogLeNetOutputs.__annotations__ = {'logits': Tensor, 'aux_logits2': Optional[Tensor],
-                                    'aux_logits1': Optional[Tensor]}
-
-# Script annotations failed with _GoogleNetOutputs = namedtuple ...
-# _GoogLeNetOutputs set here for backwards compat
-_GoogLeNetOutputs = GoogLeNetOutputs
-
-
-def googlenet(pretrained=False, progress=True, **kwargs):
-    r"""NaiveGoogLeNet (Inception v1) model architecture from
-    `"Going Deeper with Convolutions" <http://arxiv.org/abs/1409.4842>`_.
-    Args:
-        pretrained (bool): If True, returns a model pre-trained on ImageNet
-        progress (bool): If True, displays a progress bar of the download to stderr
-        aux_logits (bool): If True, adds two auxiliary branches that can improve training.
-            Default: *False* when pretrained is True otherwise *True*
-        transform_input (bool): If True, preprocesses the input according to the method with which it
-            was trained on ImageNet. Default: *False*
-    """
-    if pretrained:
-        if 'transform_input' not in kwargs:
-            kwargs['transform_input'] = True
-        if 'aux_logits' not in kwargs:
-            kwargs['aux_logits'] = False
-        if kwargs['aux_logits']:
-            warnings.warn('auxiliary heads in the pretrained googlenet model are NOT pretrained, '
-                          'so make sure to train them')
-        original_aux_logits = kwargs['aux_logits']
-        kwargs['aux_logits'] = True
-        kwargs['init_weights'] = False
-        model = NaiveGoogLeNet(**kwargs)
-        state_dict = load_state_dict_from_url(model_urls['googlenet'],
-                                              progress=progress)
-        model.load_state_dict(state_dict)
-        if not original_aux_logits:
-            model.aux_logits = False
-            model.aux1 = None
-            model.aux2 = None
-        return model
-
-    return NaiveGoogLeNet(**kwargs)
 
 
 class NaiveGoogLeNet(nn.Module):
-    __constants__ = ['aux_logits', 'transform_input']
-
-    def __init__(self, num_classes=1000, aux_logits=True, transform_input=False, init_weights=None,
+    def __init__(self, num_classes=10, init_weights=True,
                  blocks=None):
         super(NaiveGoogLeNet, self).__init__()
         if blocks is None:
             blocks = [BasicConv2d, Inception, InceptionAux]
         if init_weights is None:
-            warnings.warn('The default weight initialization of GoogleNet will be changed in future releases of '
-                          'torchvision. If you wish to keep the old behavior (which leads to long initialization times'
-                          ' due to scipy/scipy#11299), please set init_weights=True.', FutureWarning)
             init_weights = True
         assert len(blocks) == 3
         conv_block = blocks[0]
         inception_block = blocks[1]
         inception_aux_block = blocks[2]
 
-        self.aux_logits = aux_logits
-        self.transform_input = transform_input
-
-        self.conv1 = conv_block(3, 64, kernel_size=7, stride=2, padding=3)
+        self.conv1 = conv_block(1, 64, kernel_size=7, stride=2, padding=3)
         self.maxpool1 = nn.MaxPool2d(3, stride=2, ceil_mode=True)
         self.conv2 = conv_block(64, 64, kernel_size=1)
         self.conv3 = conv_block(64, 192, kernel_size=3, padding=1)
@@ -101,13 +37,6 @@ class NaiveGoogLeNet(nn.Module):
 
         self.inception5a = inception_block(832, 256, 160, 320, 32, 128, 128)
         self.inception5b = inception_block(832, 384, 192, 384, 48, 128, 128)
-
-        if aux_logits:
-            self.aux1 = inception_aux_block(512, num_classes)
-            self.aux2 = inception_aux_block(528, num_classes)
-        else:
-            self.aux1 = None
-            self.aux2 = None
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.dropout = nn.Dropout(0.2)
@@ -138,7 +67,7 @@ class NaiveGoogLeNet(nn.Module):
             x = torch.cat((x_ch0, x_ch1, x_ch2), 1)
         return x
 
-    def _forward(self, x):
+    def forward(self, x):
         # type: (Tensor) -> Tuple[Tensor, Optional[Tensor], Optional[Tensor]]
         # N x 3 x 224 x 224
         x = self.conv1(x)
@@ -160,10 +89,6 @@ class NaiveGoogLeNet(nn.Module):
         # N x 480 x 14 x 14
         x = self.inception4a(x)
         # N x 512 x 14 x 14
-        aux1 = torch.jit.annotate(Optional[Tensor], None)
-        if self.aux1 is not None:
-            if self.training:
-                aux1 = self.aux1(x)
 
         x = self.inception4b(x)
         # N x 512 x 14 x 14
@@ -171,10 +96,6 @@ class NaiveGoogLeNet(nn.Module):
         # N x 512 x 14 x 14
         x = self.inception4d(x)
         # N x 528 x 14 x 14
-        aux2 = torch.jit.annotate(Optional[Tensor], None)
-        if self.aux2 is not None:
-            if self.training:
-                aux2 = self.aux2(x)
 
         x = self.inception4e(x)
         # N x 832 x 14 x 14
@@ -191,27 +112,9 @@ class NaiveGoogLeNet(nn.Module):
         # N x 1024
         x = self.dropout(x)
         x = self.fc(x)
+        output = F.log_softmax(x, dim=1)
         # N x 1000 (num_classes)
-        return x, aux2, aux1
-
-    @torch.jit.unused
-    def eager_outputs(self, x: Tensor, aux2: Tensor, aux1: Optional[Tensor]) -> GoogLeNetOutputs:
-        if self.training and self.aux_logits:
-            return _GoogLeNetOutputs(x, aux2, aux1)
-        else:
-            return x   ##type: ignore[return-value]
-
-    def forward(self, x):
-        # type: (Tensor) -> GoogLeNetOutputs
-        x = self._transform_input(x)
-        x, aux1, aux2 = self._forward(x)
-        aux_defined = self.training and self.aux_logits
-        if torch.jit.is_scripting():
-            if not aux_defined:
-                warnings.warn("Scripted GoogleNet always returns GoogleNetOutputs Tuple")
-            return GoogLeNetOutputs(x, aux2, aux1)
-        else:
-            return self.eager_outputs(x, aux2, aux1)
+        return output
 
 
 class Inception(nn.Module):
