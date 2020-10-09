@@ -81,7 +81,7 @@ python train_naive_googlenet.py
 
 NaiveGoogLeNet and GoogLeNet model training and test outputs analysis report can be found under:
 ```
-[NaiveGoogLeNet and GoogLeNet model ReadMe](Q4_mnist_googlenet/README.md)
+[NaiveGoogLeNet and GoogLeNet model Report](Q4_mnist_googlenet/README.md)
 
 
 <!-- CONTRIBUTING -->
