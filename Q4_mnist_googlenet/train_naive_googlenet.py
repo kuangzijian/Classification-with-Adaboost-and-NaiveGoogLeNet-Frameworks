@@ -17,6 +17,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
         optimizer.zero_grad()
         model.cuda()
         output = model(data)
+        output = F.log_softmax(output[0], dim=1)
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
@@ -31,6 +32,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
     m, s = divmod(remainder, 60)
     time_str = '%02d:%02d:%02d' % (h, m, s)
     print('\nTime spent: ', time_str)
+
 def test(model, device, test_loader):
     model.eval()
     test_loss = 0
@@ -98,7 +100,7 @@ def main():
     train_loader = torch.utils.data.DataLoader(dataset1,**kwargs)
     test_loader = torch.utils.data.DataLoader(dataset2, **kwargs)
 
-    model = NaiveGoogLeNet()
+    model = NaiveGoogLeNet(input_channel=1, num_classes=10, init_weights=True)
     optimizer = optim.Adadelta(model.parameters(), lr=args.lr)
 
     scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
