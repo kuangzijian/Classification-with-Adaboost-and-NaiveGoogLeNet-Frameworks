@@ -44,7 +44,7 @@
 <!-- ABOUT THE PROJECT -->
 ## UAlberta-Multimedia-Master-Program-MM811-2020-Assignment-2
 
-This is a school project assigned by University of Alberta Mast of Multimedia program. This project focuses on topics:
+This is a school project assigned by University of Alberta Master of Multimedia program. This project focuses on topics:
 * AdaBoost
 * Pytorch autograd
 * Mnist data classification with original GoogLeNet and NaiveGoogLeNet frameworks.
