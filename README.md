@@ -42,9 +42,9 @@
 
 
 <!-- ABOUT THE PROJECT -->
-## UAlberta-Multimedia-Master-Program-MM811-2020-Assignment-2
+## Classification with Adaboost and NaiveGoogLeNet frameworks
 
-This is a school project assigned by University of Alberta Master of Multimedia program. This project focuses on topics:
+This project focuses on topics:
 * AdaBoost
 * Pytorch autograd
 * Mnist data classification with original GoogLeNet and NaiveGoogLeNet frameworks.
@@ -58,21 +58,21 @@ This is a school project assigned by University of Alberta Master of Multimedia 
 2. pip install -r requirements.txt
 ```
 
-### Q2 Implement the Adaboost algorithm class according to the Adaboost Algorithm 
+### 1 Classification with the Adaboost algorithm
 
 ```
 cd Q2_AdaBoost
 python Q2_test.py
 ```
 
-### Q3 Implement the following network (with i1=0.05, i2=0.1, b1=0.35, o1=0.01, o2=0.99)
+### 2 Classification with the following network (with i1=0.05, i2=0.1, b1=0.35, o1=0.01, o2=0.99)
 
 ```
 cd Q3_NN_with_Autograd
 python NN_with_Autograd.py
 ```
 
-### Q4 Implement Naive Inception Module for GoogLeNet and use it to train and test by using the MNIST dataset
+### 3 Mnist data classification with original GoogLeNet and NaiveGoogLeNet frameworks.
 
 ```
 cd Q4_mnist_googlenet
